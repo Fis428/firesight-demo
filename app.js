@@ -102,12 +102,14 @@ function closeNav() {
 /* ---------- 共用：對照滑桿、三步驟 ---------- */
 function steps(t) { return `<ol class="steps">${t.steps.map((st, i) => `<li><b aria-hidden="true">${i + 1}</b><strong>${esc(st.t)}</strong><span>${esc(st.d)}</span></li>`).join('')}</ol>`; }
 function compare(t) {
-  return `<figure class="compare" style="--pos:50%"><div class="cmp-stage">
-    <div class="cmp-layer">${scene(t.id, 'after')}</div><div class="cmp-layer cmp-before">${scene(t.id, 'before')}</div>
+  const c = t.compare, real = c.beforeImg && c.afterImg;
+  const layer = mode => real ? `<img src="assets/${c[mode + 'Img']}" alt="${mode === 'after' ? esc(c.after) : esc(c.before)}" loading="lazy">` : scene(t.id, mode);
+  return `<figure class="compare${real ? ' real' : ''}" style="--pos:50%"><div class="cmp-stage"${real && c.ratio ? ` style="aspect-ratio:${c.ratio}"` : ''}>
+    <div class="cmp-layer">${layer('after')}</div><div class="cmp-layer cmp-before">${layer('before')}</div>
     <div class="cmp-line" aria-hidden="true"><span>⇆</span></div>
     <span class="cmp-label cmp-l">一般畫面</span><span class="cmp-label cmp-r">AI 辨識</span>
     <input class="cmp-range" type="range" min="0" max="100" value="50" aria-label="拖曳比較：一般畫面與 AI 辨識畫面"></div>
-    <figcaption><span><b>左</b>${esc(t.compare.before)}</span><span><b>右</b>${esc(t.compare.after)}</span><em>示意圖，待替換為團隊提供的實際對照畫面</em></figcaption></figure>`;
+    <figcaption><span><b>左</b>${esc(t.compare.before)}</span><span><b>右</b>${esc(t.compare.after)}</span>${real ? (c.note ? `<em class="cmp-note">${esc(c.note)}</em>` : '') : '<em>示意圖，待替換為團隊提供的實際對照畫面</em>'}</figcaption></figure>`;
 }
 function person(x, y, s = 1) {
   return `<g transform="translate(${x} ${y}) scale(${s})" fill="#1c2a31"><circle cx="0" cy="-62" r="11"/><rect x="-15" y="-49" width="30" height="46" rx="10"/><rect x="-13" y="-8" width="10" height="38" rx="4"/><rect x="3" y="-8" width="10" height="38" rx="4"/></g>`;
@@ -153,6 +155,7 @@ function roadmap() {
 }
 function partnerMedia(t) {
   if (t.logos) return `<div class="pc-logos">${t.logos.map(l => pic(l, t.name + ' 標誌')).join('<span class="pc-div" aria-hidden="true"></span>')}</div>`;
+  if (typeof t.photo === 'string') return `<div class="pc-portrait">${pic(t.photo, t.person ? t.person + ' 形象照' : t.name)}</div>`;
   if (t.photo) return `<div class="pc-photo"><span class="pc-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" fill="#fff"/><path d="M4 21c1.2-4.5 4.4-6.5 8-6.5s6.8 2 8 6.5" fill="#fff"/></svg></span><span class="pc-ph">主持人形象照</span></div>`;
   return `<div class="pc-logotext">${esc(t.logoText || 'Logo')}</div>`;
 }
@@ -234,12 +237,14 @@ function home(params) {
 }
 
 /* ---------- 應用情境（成果與情境合併；內容頁共用 7 區塊模板） ---------- */
+const dateCat = a => [a.date, a.cat].filter(Boolean).join(' · ');
 function applicationsPage(id) {
-  if (!id) return hero('應用情境', 'APPLICATIONS', '從消防現場的困難出發，看每一項成果做到哪裡、由誰推進。') + `<div class="wrap page-body">${applications.map(a => `<article class="result-row reveal"><a class="art" href="#/applications/${a.id}" tabindex="-1" aria-hidden="true">${pic(a.cover, '')}</a><div><span class="meta">${esc(a.date)} · ${esc(a.cat)}</span> ${badge(a.maturity)}${a.featured ? ' <span class="tag">代表成果</span>' : ''}<h3><a href="#/applications/${a.id}">${esc(a.title)}</a></h3><p>${esc(a.summary)}</p></div>${link('applications/' + a.id, '看完整介紹', 'text-btn')}</article>`).join('')}<p class="source-note">${SOURCE_NOTE}</p></div>`;
+  if (!id) return hero('應用情境', 'APPLICATIONS', '從消防現場的困難出發，看每一項成果做到哪裡、由誰推進。') + `<div class="wrap page-body">${applications.map(a => `<article class="result-row reveal"><a class="art" href="#/applications/${a.id}" tabindex="-1" aria-hidden="true">${pic(a.cover, '')}</a><div><span class="meta">${esc(dateCat(a))}</span> ${badge(a.maturity)}${a.featured ? ' <span class="tag">代表成果</span>' : ''}<h3><a href="#/applications/${a.id}">${esc(a.title)}</a></h3><p>${esc(a.summary)}</p></div>${link('applications/' + a.id, '看完整介紹', 'text-btn')}</article>`).join('')}<p class="source-note">${SOURCE_NOTE}</p></div>`;
   const a = byId(applications, id); if (!a) return missing();
   const ts = (a.techs || []).map(x => byId(techs, x));
   const imgs = (list, cls) => `<div class="figs ${cls || ''}">${list.map(i => `<figure>${pic(i.src, i.alt)}</figure>`).join('')}</div>`;
   const cap = c => c ? `<p class="fig-cap">${esc(c)}</p>` : '';
+  const figCls = c => [c.pair && 'pair', c.wide && 'wide', !c.pair && c.narrow && 'narrow'].filter(Boolean).join(' ');
   const S = [];
   /* 01 介紹 */
   S.push(['intro', '介紹', `<h2>${esc(a.intro.heading)}</h2>${a.intro.sub ? `<p class="lead">${esc(a.intro.sub)}</p>` : ''}${a.intro.body.map(p => `<p>${esc(p)}</p>`).join('')}
@@ -254,23 +259,26 @@ function applicationsPage(id) {
   /* 03 目前做到哪裡 */
   const pg = a.progress;
   if (pg) S.push(['progress', '目前做到哪裡', `<h2>${esc(pg.heading || '目前做到哪裡')}</h2><div class="scn-status">${badge(a.maturity)}<span class="meta">${MATURITY[a.maturity].note}</span></div>
-    ${pg.stats ? `<div class="stat-grid"><figure class="stat-chart">${pic(pg.image.src, pg.image.alt)}</figure><ul class="stats">${pg.stats.map(s => `<li><strong>${esc(s.v)}</strong><span>${esc(s.l)}</span></li>`).join('')}</ul></div>${cap(pg.image.caption)}`
+    ${pg.stats && pg.wide ? `<ul class="stats stats-row">${pg.stats.map(s => `<li><strong>${esc(s.v)}</strong><span>${esc(s.l)}</span></li>`).join('')}</ul>${pg.note ? `<div class="notice">${esc(pg.note)}</div>` : ''}<figure class="fig-wide">${pic(pg.image.src, pg.image.alt)}</figure>${cap(pg.image.caption)}`
+      : pg.stats ? `<div class="stat-grid"><figure class="stat-chart">${pic(pg.image.src, pg.image.alt)}</figure><ul class="stats">${pg.stats.map(s => `<li><strong>${esc(s.v)}</strong><span>${esc(s.l)}</span></li>`).join('')}</ul></div>${cap(pg.image.caption)}`
       : pg.image ? `<figure class="fig-one">${pic(pg.image.src, pg.image.alt)}</figure>${cap(pg.image.caption)}` : ''}
-    ${pg.text ? `<p>${esc(pg.text)}</p>` : ''}${pg.note ? `<div class="notice">${esc(pg.note)}</div>` : ''}`]);
+    ${pg.text ? `<p>${esc(pg.text)}</p>` : ''}${pg.note && !(pg.stats && pg.wide) ? `<div class="notice">${esc(pg.note)}</div>` : ''}`]);
   /* 04 實際案例 */
-  if (a.cases?.length) S.push(['cases', '實際案例', a.cases.map(c => `<h2>${esc(c.heading)}</h2><p>${esc(c.body)}</p>${imgs(c.images, c.narrow ? 'narrow' : '')}${cap(c.caption)}`).join('')]);
+  if (a.cases?.length) S.push(['cases', '實際案例', a.cases.map(c => `<h2>${esc(c.heading)}</h2><p>${esc(c.body)}</p>${imgs(c.images, figCls(c))}${cap(c.caption)}`).join('')]);
   /* 05 額外成果 */
-  if (a.extras?.length) S.push(['extras', '額外成果', a.extras.map(c => `<div class="extra"><h2>${esc(c.heading)}</h2><p>${esc(c.body)}</p>${imgs(c.images, c.pair ? 'pair' : c.narrow ? 'narrow' : '')}${cap(c.caption)}</div>`).join('')]);
+  if (a.extras?.length) S.push(['extras', '額外成果', a.extras.map(c => `<div class="extra"><h2>${esc(c.heading)}</h2><p>${esc(c.body)}</p>${imgs(c.images, figCls(c))}${cap(c.caption)}</div>`).join('')]);
   /* 06 團隊介紹 */
-  if (a.lab) { const L = a.lab; S.push(['team', '學校實驗室與老師', `<div class="lab"><div><span class="lab-k">學校與系所</span><p class="lab-v">${esc(L.school)}<br>${esc(L.dept)}</p></div>
-    <div><span class="lab-k">實驗室</span><p class="lab-v"><strong>${esc(L.lab)}</strong></p><p>${esc(L.labDesc)}</p></div>
-    <div><span class="lab-k">主持人</span><p class="lab-v"><strong>${esc(L.pi)}</strong></p><p>${esc(L.piDesc)}</p><a class="text-btn" href="${esc(L.url)}" target="_blank" rel="noopener">實驗室官網 <span aria-hidden="true">↗</span></a></div></div>
-    <div class="lab-logos">${L.logos.map(l => pic(l.src, l.alt)).join('')}</div>`]); }
+  if (a.lab) { const L = a.lab; S.push(['team', '學校實驗室與老師', `<div class="lab${L.photo ? ' has-photo' : ''}">${L.photo ? `<figure class="lab-photo">${pic(L.photo, L.pi + ' 形象照')}<figcaption>${esc(L.pi)}</figcaption></figure>` : ''}
+    <div><span class="lab-k">學校與系所</span><p class="lab-v">${esc(L.school)}<br>${esc(L.dept)}</p></div>
+    <div><span class="lab-k">實驗室</span><p class="lab-v"><strong>${esc(L.lab)}</strong>${L.labEn ? `<br><span class="lab-en">${esc(L.labEn)}</span>` : ''}</p><p>${esc(L.labDesc)}</p></div>
+    <div><span class="lab-k">主持人</span><p class="lab-v"><strong>${esc(L.pi)}</strong></p><p>${esc(L.piDesc)}</p><a class="text-btn" href="${esc(L.url)}" target="_blank" rel="noopener">${esc(L.urlLabel || '實驗室官網')} <span aria-hidden="true">↗</span></a></div></div>
+    ${L.projects?.length ? `<details class="tech-details lab-projects"><summary>近 5 年主持計畫（${L.projects.length} 項）</summary><ul>${L.projects.map(x => `<li><strong>${esc(x.name)}</strong><span>${esc(x.when)}・${esc(x.role)}・${esc(x.org)}</span></li>`).join('')}</ul></details>` : ''}
+    ${L.logos?.length ? `<div class="lab-logos">${L.logos.map(l => pic(l.src, l.alt)).join('')}</div>` : ''}`]); }
   else if (a.teams?.length) S.push(['team', '參與團隊', `<div class="pgrid">${a.teams.map(x => partnerCard(byId(teams, x))).join('')}</div>`]);
 
   const i = applications.indexOf(a), next = applications[(i + 1) % applications.length];
   return `<section class="page-hero app-hero"><div class="wrap"><div class="crumb"><a href="#/">首頁</a> / <a href="#/applications">應用情境</a> / ${esc(a.title)}</div>
-      <span class="kicker">${esc(a.date)} · ${esc(a.cat)}</span><h1>${esc(a.title)}</h1><p>${esc(a.summary)}</p><div class="card-tags spaced-sm">${badge(a.maturity)}${ts.map(t => `<span class="tag">${esc(t.tech)}</span>`).join('')}</div></div></section>
+      <span class="kicker">${esc(dateCat(a))}</span><h1>${esc(a.title)}</h1><p>${esc(a.summary)}</p><div class="card-tags spaced-sm">${badge(a.maturity)}${ts.map(t => `<span class="tag">${esc(t.tech)}</span>`).join('')}</div></div></section>
     <nav class="sec-nav" aria-label="本頁段落"><div class="wrap">${S.map(([k, l], n) => `<button data-jump="sec-${k}"><b>${String(n + 1).padStart(2, '0')}</b>${l}</button>`).join('')}</div></nav>
     <div class="wrap app-body">${S.map(([k, l, html], n) => `<section class="app-sec" id="sec-${k}"><span class="sec-tag"><b>${String(n + 1).padStart(2, '0')}</b>${l}</span><div class="prose">${html}</div></section>`).join('')}
       ${a.pending ? `<div class="notice">${esc(a.pending)}</div>` : ''}<p class="source-note">${SOURCE_NOTE}</p>

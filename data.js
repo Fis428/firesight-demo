@@ -1,4 +1,4 @@
-/* 消防 Edge AI 平台｜內容資料（Round 3，2026-11）
+/* 消防 Edge AI 平台｜內容資料（Round 3，2026-11-09：高科大成果頁；合作團隊 5 個單位＋歡迎加入、聯絡方式登入後顯示）
  * 所有頁面內容都從這個檔案讀取。新增或修改內容只要改這裡，不用動版面程式。
  * 各類內容以 id 互相關聯。正式版由 Vic 改為資料庫與後台，欄位對照請見 HANDOFF.md。
  *
@@ -18,7 +18,7 @@ const MATURITY = {
  * app：這個技術放在哪一個應用情境頁 */
 const techs = [
   {
-    id: 'distance', app: 'firesight',
+    id: 'distance', app: 'distance',
     title: '看清火源有多遠',
     tech: '火焰辨識＋深度測距',
     team: 'lin',
@@ -26,15 +26,17 @@ const techs = [
     hook: '煙霧與低照度下，很難只靠畫面判斷火源距離。',
     need: '火場的煙霧、低照度與快速變化，使人員難以僅從影像判斷火源距離。前後方也需要能共同判讀的資訊。',
     steps: [
-      { t: '取得影像', d: '深度相機同時取得現場畫面與深度資訊' },
+      { t: '取得影像', d: '深度相機、影片或照片輸入現場畫面' },
       { t: '設備端辨識', d: '在邊緣運算設備上辨識火焰位置' },
       { t: '標示距離', d: '畫面上標出火焰辨識框與估算距離' }
     ],
-    result: '記者會展板呈現燃燒櫃影像中的火焰辨識與測距範例，畫面中約 8.70 公尺為該次展示結果。',
-    method: '透過深度相機取得影像，結合 NVIDIA Jetson Orin 與 Infineon E84，在邊緣設備上進行火焰辨識及距離估算，標示火焰位置、辨識框與即時距離。',
+    result: '系統已展示火焰辨識與目標測距，並可切換彩色、深度或並排的影像模式。不同光線、煙霧、距離及移動情境下的表現，仍需持續驗證。',
+    method: '以 Gemini 435Le 深度相機取得影像，由 NVIDIA Jetson 執行火焰辨識，並整合 E84 裝置回傳的辨識結果；再結合相機原生深度或 AI 深度估算（DA3），計算辨識框內目標區域的代表距離。',
     future: '規劃整合於消防載具或可攜式設備，並串接指揮 Dashboard，提供前後方共同判讀。',
     devices: ['depth', 'orin', 'e84'],
-    compare: { before: '煙霧中只看得到模糊火光', after: '標出火源位置與估算距離' }
+    compare: { before: '消防局提供的原始影像', after: '同一影格的火焰辨識框與估算距離',
+      beforeImg: 'nkust-cmp-before.jpg', afterImg: 'nkust-cmp-after.jpg', ratio: '1600/763',
+      note: '消防局提供影像的辨識測試，兩張為同一影格。圖中約 8.60 公尺為該影格的估算值，不代表整體測距誤差或所有火場的效果。' }
   },
   {
     id: 'smoke', app: 'vision',
@@ -194,6 +196,83 @@ const applications = [
     pending: ''
   },
   {
+    id: 'distance', featured: false,
+    nav: '火焰辨識與即時測距',
+    title: '火焰辨識與即時測距', name: '火焰測距', headline: '火焰辨識與即時測距',
+    date: '', cat: '技術展示', maturity: 'test',
+    label: '', summary: '在同一畫面標示火焰位置與估算距離，協助前線與後方人員判讀現場。',
+    points: [], foot: '',
+    cover: 'nkust-case-multimodel.jpg',
+    techs: ['distance'],
+    intro: {
+      heading: '火焰辨識與即時測距',
+      sub: '消防 Edge AI 火焰辨識與距離資訊整合',
+      body: ['結合深度相機與邊緣 AI，在同一畫面標示火焰位置與估算距離，協助前線與後方人員判讀現場。系統支援相機、影片與照片輸入，主要推論在現場設備上執行，可降低對外部網路的依賴。'],
+      painHeading: '現場痛點與技術作法',
+      pain: [
+        '火場中的煙霧、低照度與視角變化，會影響從影像判斷火源位置與距離；單一畫面也不容易讓前線與後方掌握一致的資訊。',
+        '團隊以 Gemini 435Le 深度相機取得影像，由 NVIDIA Jetson 執行火焰辨識，並整合 E84 裝置回傳的辨識結果；再結合相機原生深度或 AI 深度估算（DA3），計算辨識框內目標區域的代表距離。畫面可切換彩色、深度或並排預覽。'
+      ]
+    },
+    progress: {
+      heading: '目前做到哪裡：資料規模與系統功能',
+      stats: [
+        { v: '7,436 張', l: 'Fire／Smoke 影像資料（訓練 5,623、驗證 672、測試 1,141）' },
+        { v: '2 類目標', l: '火焰（Fire）、煙霧（Smoke）' },
+        { v: '3 種輸入', l: '深度相機、影片、照片' },
+        { v: '1280 × 800', l: '相機擷取的彩色／深度影像尺寸' }
+      ],
+      wide: true,
+      image: { src: 'nkust-progress.jpg', alt: '左為彩色影像中的火焰辨識框與估算距離，右為同一畫面的相機原生深度', caption: '左為彩色影像中的火焰辨識框，右為相機原生深度（深度來源：相機原生深度）。圖中距離為該次測試的估算結果。' },
+      text: '系統已展示火焰辨識與目標測距，並可切換不同影像模式。不同光線、煙霧、距離及移動情境下的表現，仍需持續驗證。',
+      note: '資料量並非辨識率；影像尺寸與輸入種類為功能條件，非效能指標。各圖數值不代表整體測距誤差，也不代表所有火場的效果。'
+    },
+    cases: [
+      { heading: '室外測試影片：多模型整合畫面',
+        body: '將 E84 與 Jetson 的火煙辨識結果疊加於現場影像，並以 AI 深度估算（DA3）顯示目標距離，讓觀看者同時判讀目標與周圍環境。屬影片回放展示。',
+        images: [{ src: 'nkust-case-multimodel.jpg', alt: '室外燃燒測試影片畫面，標示 E84 與 Jetson 的火焰、煙霧辨識框與估算距離，右側為執行資訊' }],
+        caption: '畫面含火焰與煙霧辨識框、估算距離及右側執行資訊（深度來源：DA3）。單一影格數值不代表整體準確率或測距誤差。' },
+      { heading: '燃燒場景的原始相機畫面',
+        body: '團隊在室外與室內燃燒場景擷取的原始彩色影像，作為辨識與深度對照的測試資料。',
+        images: [{ src: 'nkust-outdoor.jpg', alt: '室外燃燒與煙霧場景' }, { src: 'nkust-indoor.jpg', alt: '室內燃燒場景' }],
+        caption: '左為室外燃燒與煙霧場景，右為室內燃燒場景；兩張為不同測試情境的原始相機畫面。', pair: true }
+    ],
+    extras: [
+      { heading: '彩色影像與原生深度對照',
+        body: '團隊在室內外燃燒場景擷取影像，同時保存彩色影像、相機原生深度與量測資訊，供辨識、深度對照與後續系統整合測試使用。已完成多來源輸入、影像模式切換及量測記錄保存。',
+        images: [
+          { src: 'nkust-depth-outdoor-fire.jpg', alt: '室外火焰：彩色影像與原生深度' },
+          { src: 'nkust-depth-outdoor-smoke.jpg', alt: '室外煙霧：彩色影像與原生深度' },
+          { src: 'nkust-depth-indoor.jpg', alt: '室內燃燒：彩色影像與原生深度' },
+          { src: 'nkust-depth-closeup.jpg', alt: '近距拍攝：彩色影像與原生深度' }
+        ],
+        caption: '依序為室外火焰、室外煙霧、室內燃燒、近距拍攝；每組左為彩色影像，右為同時間的相機原生深度。深度以 0.3 至 10 公尺範圍轉為偽彩色，近暖遠冷，超出上限以最遠色顯示，黑色為無效量測。', pair: true, wide: true }
+    ],
+    lab: {
+      school: '國立高雄科技大學',
+      dept: '電子工程系',
+      lab: '智慧計算與資安實驗室',
+      labEn: 'Intelligent Computing & Information Security Laboratory',
+      labDesc: '聚焦機器學習、深度學習、智慧計算與資訊安全。在本計畫中投入消防影像辨識、深度估測與邊緣運算整合，負責火焰辨識與目標測距、彩色及深度影像呈現，以及 Jetson 與 E84 辨識結果的系統整合，並以實際影像與量測資料進行原型測試。',
+      pi: '林志學 教授',
+      piDesc: '國立高雄科技大學前瞻智慧科技暨資通安全研究中心主任，曾借調擔任財團法人資訊工業策進會人工智慧研究院副院長。專長為資安與前瞻 AI 技術應用，具 17 年研究經歷。',
+      photo: 'nkust-lin.jpg',
+      url: 'https://ec.nkust.edu.tw/p/404-1122-98332.php?Lang=zh-tw', urlLabel: '教師介紹頁',
+      projects: [
+        { name: '微模型庫保護機制研究與先期驗證 POC', when: '2026/7–迄今', role: '計畫主持人', org: '財團法人資訊工業策進會' },
+        { name: '運用 AIR（AI 與 AR）技術之中外耳病灶識別暨臨床報告自動生成系統之研製', when: '2025/8–2026/8', role: '計畫主持人', org: '國家科學及技術委員會' },
+        { name: '政府雲端安全組態基準設計與檢測技術實現計畫', when: '2025/10–迄今', role: '共同主持人', org: '國家資通安全研究院' },
+        { name: '零信任物聯網資安防護推動計畫－南部產業輔導計畫', when: '2025/5–2025/10', role: '計畫主持人', org: '數位發展部數位產業署' },
+        { name: '資安跨域聯防暨物聯網場域推動計畫－南部產業輔導計畫', when: '2024/5–2024/10', role: '計畫主持人', org: '數位發展部數位產業署' },
+        { name: '晶粒切割品質監控 AI 檢測平台計畫', when: '2023/11–2024/7', role: '計畫主持人', org: '華泰電子股份有限公司' },
+        { name: '基於知識蒸餾模型之參數輕量化深度學習技術應用於高精度防爆扣件光學自動化瑕疵檢測', when: '2022/8–2023/7', role: '計畫主持人', org: '國家科學及技術委員會' }
+      ],
+      logos: [{ src: 'logo-icis.png', alt: '智慧計算與資安實驗室' }]
+    },
+    teams: ['lin'],
+    pending: ''
+  },
+  {
     id: 'count', featured: false,
     nav: '從手推車計數延伸消防應用',
     title: '從手推車計數延伸消防應用', name: '人員計數', headline: '人員計數',
@@ -262,8 +341,9 @@ const teams = [
     brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
     role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
   { id: 'lin', name: '高雄科技大學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
-    personLabel: '主持人', person: '林志學', photo: true, pending: '主持人形象照、職稱與官網待補',
-    brief: '結合火焰辨識與深度測距，讓現場影像同時呈現火焰位置及距離。', app: 'firesight' },
+    personLabel: '主持人', person: '林志學 教授', org: '國立高雄科技大學・智慧計算與資安實驗室',
+    photo: 'nkust-lin.jpg', url: 'https://ec.nkust.edu.tw/p/404-1122-98332.php?Lang=zh-tw',
+    brief: '開發火焰辨識與深度測距技術，整合消防邊緣 AI。', app: 'distance' },
   { id: 'hsu', name: '陽明交通大學團隊', type: '學研團隊', title: '濃煙下的人員與火煙辨識',
     personLabel: '主持人', person: '許志仲 副教授', org: '國立陽明交通大學・ACVLab',
     logos: ['logo-nycu.png', 'logo-acvlab.png'], url: 'https://sites.google.com/view/acvlab',
