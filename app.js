@@ -156,7 +156,9 @@ function partnerMedia(t) {
   if (t.photo) return `<div class="pc-photo"><span class="pc-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" fill="#fff"/><path d="M4 21c1.2-4.5 4.4-6.5 8-6.5s6.8 2 8 6.5" fill="#fff"/></svg></span><span class="pc-ph">主持人形象照</span></div>`;
   return `<div class="pc-logotext">${esc(t.logoText || 'Logo')}</div>`;
 }
-const personLine = t => t.person ? `${esc(t.personLabel || '聯繫窗口')}｜${esc(t.person)}` : `<span class="muted">${esc(t.personLabel || '聯繫窗口')}待補</span>`;
+/* 窗口姓名：未登入顯示英文（person），登入後若有 personZh 改顯示中文姓名職稱 */
+const shownName = t => (loggedIn() && t.personZh) || t.person || t.name || '';
+const personLine = t => t.person ? `${esc(t.personLabel || '聯繫窗口')}｜${esc(shownName(t))}` : `<span class="muted">${esc(t.personLabel || '聯繫窗口')}待補</span>`;
 /* 「歡迎加入」卡片：固定排在合作團隊最後，不屬於 teams 資料（不進搜尋、不計入單位數、沒有單位頁） */
 function joinCard(compact = false) {
   return `<a class="pcard pc-join${compact ? ' compact' : ''}" href="#/contact?purpose=${encodeURIComponent('合作洽詢')}">
@@ -170,7 +172,7 @@ function contactDetails(c) {
   if (!loggedIn()) return `<li>${lockedContact()}</li>`;
   return `${c.phone ? `<li>電話：<a href="tel:${esc(c.phone.replace(/-/g, ''))}">${esc(c.phone)}</a></li>` : ''}${c.email ? `<li>信箱：<a href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>` : ''}`;
 }
-const contactLines = (c = CONTACT, org = CONTACT.org) => `<ul class="plain contact-lines"><li>${esc(org)}</li><li>${esc(c.personLabel || '聯絡人')}：${esc(c.person || c.name || '待補')}</li>${contactDetails(c)}</ul>`;
+const contactLines = (c = CONTACT, org = CONTACT.org) => `<ul class="plain contact-lines"><li>${esc(org)}</li><li>${esc(c.personLabel || '聯絡人')}：${esc(shownName(c) || '待補')}</li>${contactDetails(c)}</ul>`;
 function partnerCard(t, compact = false) {
   return `<article class="pcard${compact ? ' compact' : ''}">
     <a class="pc-media" href="#/team/${t.id}" aria-label="${esc(t.name)}">${partnerMedia(t)}${t.pending ? '<span class="pc-pending">素材待補</span>' : ''}</a>

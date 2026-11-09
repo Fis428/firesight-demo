@@ -248,7 +248,7 @@ const CONTACT = {
  * person：姓名職稱；空白時卡片顯示「主持人待補」或「聯繫窗口待補」
  * role：單位頁「平台角色」說明（沒有負責技術模組的單位會顯示這段）
  * phone、email：聯繫窗口的電話與信箱，登入後才顯示（正式版須由後端控管，見 HANDOFF）
- * 窗口姓名對外顯示英文
+ * 窗口姓名對外顯示英文（person）；personZh 為中文姓名職稱，登入後才顯示
  * pending：素材尚未到齊時顯示「素材待補」；到齊後刪掉這個欄位 */
 const teams = [
   { id: 'infineon', name: '英飛凌科技', type: '企業', title: '核心技術合作夥伴',
@@ -257,7 +257,7 @@ const teams = [
     brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
     role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
   { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
-    personLabel: '聯繫窗口', person: '余亮璇 專案經理', email: CONTACT.email,
+    personLabel: '聯繫窗口', person: 'Liang Yu', personZh: '余亮璇 專案經理', email: CONTACT.email,
     logos: ['guardians.png'], pending: '官網待補',
     brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
     role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
