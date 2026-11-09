@@ -234,7 +234,8 @@ const devices = [
 ];
 const ACCESS_NOTE = '由臺灣守護者聯盟社會公益協會擔任詢價窗口。目前不提供線上付款；價格、供應與取得方式由窗口回覆。';
 
-/* 平台聯絡窗口：全站共用（聯絡我們、設備詢價、守護者協會單位頁）；電話與信箱登入後才顯示 */
+/* 平台聯絡窗口（與我們聯繫）：聯絡我們頁與設備詢價共用；電話與信箱登入後才顯示
+ * 守護者協會卡片的聯繫窗口另填（余亮璇 專案經理），信箱沿用協會信箱 */
 const CONTACT = {
   org: '臺灣守護者聯盟社會公益協會',
   name: '吳泓億',
@@ -256,8 +257,8 @@ const teams = [
     brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
     role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
   { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
-    personLabel: '聯繫窗口', person: CONTACT.name, phone: CONTACT.phone, email: CONTACT.email,
-    logos: ['guardians.png'], pending: '官網待補；聯繫窗口英文姓名待補',
+    personLabel: '聯繫窗口', person: '余亮璇 專案經理', email: CONTACT.email,
+    logos: ['guardians.png'], pending: '官網待補',
     brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
     role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
   { id: 'lin', name: '高雄科技大學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
