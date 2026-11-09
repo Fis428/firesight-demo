@@ -29,6 +29,7 @@ const REASONS = {
   reply: ['登入後即可回覆', '你剛剛輸入的內容會保留，登入完成後自動送出。'],
   member: ['登入以查看會員中心', '會員中心集中顯示你的發文與詢價紀錄。'],
   admin: ['管理員登入', '內容管理後臺僅限指定的管理員帳號。'],
+  contact: ['登入後查看聯絡方式', '電話與信箱僅提供給已登入的會員；不登入也可以直接使用聯絡表單。'],
   default: ['登入平台', '瀏覽網站不需要登入。登入後可以發文、回覆，並在會員中心追蹤。']
 };
 let pendingAfterLogin = null, lastFocus = null;
@@ -62,7 +63,7 @@ function finishLogin() {
   closeModal(); renderAccount();
   toast(`已登入：${me().name}（${me().identity}）`);
   const run = pendingAfterLogin; pendingAfterLogin = null;
-  if (run) run(); else if (['member', 'admin', 'community'].includes(route().section)) render();
+  if (run) run(); else if (['member', 'admin', 'community', 'team', 'contact'].includes(route().section)) render();
 }
 function setRole(role) {
   if (role === 'guest') auth.role = 'guest';
@@ -158,11 +159,28 @@ function partnerMedia(t) {
   if (t.photo) return `<div class="pc-photo"><span class="pc-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" fill="#fff"/><path d="M4 21c1.2-4.5 4.4-6.5 8-6.5s6.8 2 8 6.5" fill="#fff"/></svg></span><span class="pc-ph">主持人形象照</span></div>`;
   return `<div class="pc-logotext">${esc(t.logoText || 'Logo')}</div>`;
 }
+/* 窗口姓名：未登入顯示英文（person），登入後若有 personZh 改顯示中文姓名職稱 */
+const shownName = t => (loggedIn() && t.personZh) || t.person || t.name || '';
+const personLine = t => t.person ? `${esc(t.personLabel || '聯繫窗口')}｜${esc(shownName(t))}` : `<span class="muted">${esc(t.personLabel || '聯繫窗口')}待補</span>`;
+/* 「歡迎加入」卡片：固定排在合作團隊最後，不屬於 teams 資料（不進搜尋、不計入單位數、沒有單位頁） */
+function joinCard(compact = false) {
+  return `<a class="pcard pc-join${compact ? ' compact' : ''}" href="#/contact?purpose=${encodeURIComponent('合作洽詢')}">
+    <span class="pc-media"><span class="pc-plus" aria-hidden="true">＋</span></span>
+    <span class="pc-body"><span class="pc-name">歡迎加入</span><span class="pc-person">學研、產業、消防單位合作洽詢 →</span></span></a>`;
+}
+/* 聯絡方式：姓名公開；電話與信箱登入後才顯示（原型只做畫面隱藏，正式版由後端控管） */
+const lockedContact = () => `<button class="btn small lock-btn" data-login="contact">🔒 登入後查看電話與信箱</button>`;
+function contactDetails(c) {
+  if (!c.phone && !c.email) return '';
+  if (!loggedIn()) return `<li>${lockedContact()}</li>`;
+  return `${c.phone ? `<li>電話：<a href="tel:${esc(c.phone.replace(/-/g, ''))}">${esc(c.phone)}</a></li>` : ''}${c.email ? `<li>信箱：<a href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>` : ''}`;
+}
+const contactLines = (c = CONTACT, org = CONTACT.org) => `<ul class="plain contact-lines"><li>${esc(org)}</li><li>${esc(c.personLabel || '聯絡人')}：${esc(shownName(c) || '待補')}</li>${contactDetails(c)}</ul>`;
 function partnerCard(t, compact = false) {
   return `<article class="pcard${compact ? ' compact' : ''}">
     <a class="pc-media" href="#/team/${t.id}" aria-label="${esc(t.name)}">${partnerMedia(t)}${t.pending ? '<span class="pc-pending">素材待補</span>' : ''}</a>
     <div class="pc-body"><a class="pc-name" href="#/team/${t.id}">${esc(t.name)}</a>
-      <span class="pc-person">${t.person ? esc(t.person) : `<span class="muted">${esc(t.pending || '')}</span>`}</span>
+      <span class="pc-person">${personLine(t)}</span>
       ${compact ? '' : `<span class="pc-type">${esc(t.type)}・${esc(t.title)}</span>${t.url ? `<a class="pc-url" href="${esc(t.url)}" target="_blank" rel="noopener">官網 ↗</a>` : ''}`}</div></article>`;
 }
 
@@ -208,12 +226,12 @@ function home(params) {
   <section class="wrap block"><div class="section-head reveal"><div><span class="kicker">ROADMAP</span><h2>計畫目前走到哪裡</h2></div>${link('partners', '計畫進程與合作團隊', 'text-btn')}</div>
     <div class="reveal">${roadmap()}</div></section>
   <section class="wrap block"><div class="section-head reveal"><div><span class="kicker">PARTNERS</span><h2>一起推進的團隊</h2></div>${link('partners', '認識合作團隊', 'text-btn')}</div>
-    <div class="pgrid compact reveal">${teams.map(x => partnerCard(x, true)).join('')}</div></section>
+    <div class="pgrid partners-grid compact reveal">${teams.map(x => partnerCard(x, true)).join('')}${joinCard(true)}</div></section>
   <section class="wrap block last"><div class="section-head reveal"><div><span class="kicker">GET INVOLVED</span><h2>接下來，你可以</h2></div></div>
     <div class="join reveal">${[
       ['applications', '看更多應用情境', '整合原型、技術展示與活動紀錄'],
       ['community', '加入技術交流', '提出現場需求或技術問題'],
-      ['devices', '詢價相關設備', '由台灣守護者聯盟協會擔任窗口'],
+      ['devices', '詢價相關設備', '由臺灣守護者聯盟社會公益協會擔任窗口'],
       ['contact', '合作聯絡', '學研、產業或消防單位的合作提案']
     ].map(([p, h, d]) => `<a class="join-card" href="#/${p}"><strong>${h}</strong><span>${d}</span><i aria-hidden="true">→</i></a>`).join('')}</div></section>`;
 }
@@ -272,7 +290,7 @@ function applicationsPage(id) {
 const device = d => `<div class="device">${d.chip}<small>概念示意圖</small></div>`;
 const inquire = (d, cls = 'btn primary') => link(`contact?purpose=${encodeURIComponent('設備詢價')}&item=${encodeURIComponent(d.name)}`, '詢價', cls);
 function devicesPage(id) {
-  if (!id) return hero('設備／商城', 'DEVICES & SHOP', '專案使用的開發設備與可取得的品項。目前以詢價方式提供，由台灣守護者聯盟協會回覆。') + `<div class="wrap page-body"><div class="notice">${ACCESS_NOTE}</div><div class="grid3">${devices.map(d => `<article class="card reveal"><a class="art" href="#/devices/${d.id}" tabindex="-1" aria-hidden="true">${device(d)}</a><div class="card-body"><span class="tag">${esc(d.sub)}</span><h3><a href="#/devices/${d.id}">${esc(d.name)}</a></h3><p>${esc(d.desc)}</p><div class="shop-row"><span class="price">價格：${esc(d.price)}</span>${inquire(d, 'btn small primary')}</div>${link('devices/' + d.id, '查看設備資訊', 'text-btn')}</div></article>`).join('')}</div></div>`;
+  if (!id) return hero('設備／商城', 'DEVICES & SHOP', '專案使用的開發設備與可取得的品項。目前以詢價方式提供，由臺灣守護者聯盟社會公益協會回覆。') + `<div class="wrap page-body"><div class="notice">${ACCESS_NOTE}</div><div class="grid3">${devices.map(d => `<article class="card reveal"><a class="art" href="#/devices/${d.id}" tabindex="-1" aria-hidden="true">${device(d)}</a><div class="card-body"><span class="tag">${esc(d.sub)}</span><h3><a href="#/devices/${d.id}">${esc(d.name)}</a></h3><p>${esc(d.desc)}</p><div class="shop-row"><span class="price">價格：${esc(d.price)}</span>${inquire(d, 'btn small primary')}</div>${link('devices/' + d.id, '查看設備資訊', 'text-btn')}</div></article>`).join('')}</div></div>`;
   const d = byId(devices, id); if (!d) return missing();
   const used = techs.filter(t => t.devices.includes(d.id)).map(t => appOf(t.id));
   return hero(d.name, 'DEVICE', esc(d.sub), ['devices', '設備／商城']) + `<div class="wrap page-body"><div class="product-hero"><div class="art">${device(d)}</div><div class="prose"><span class="tag">${esc(d.sub)}</span><h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><p class="price big">價格：${esc(d.price)}</p>${inquire(d)}<p class="meta">${ACCESS_NOTE}</p></div></div>
@@ -283,8 +301,8 @@ function devicesPage(id) {
 function partners() {
   return hero('計畫進程與合作團隊', 'ROADMAP & PARTNERS', '連結消防需求、學研技術與產業資源，讓現場經驗成為開發的起點。') + `<div class="wrap page-body">
     <section class="panel"><div class="section-head nohead"><div><span class="kicker">ROADMAP</span><h2>計畫進程</h2></div><small>以日期、里程碑與目前階段呈現</small></div>${roadmap()}</section>
-    <section class="panel"><div class="section-head nohead"><div><span class="kicker">PARTNERS</span><h2>合作團隊</h2></div><small>${teams.length} 個合作單位</small></div><div class="pgrid">${teams.map(t => partnerCard(t)).join('')}</div>
-      <p class="source-note">部分單位的 Logo、形象照與官網預計 2026-11-10 補齊。</p></section>
+    <section class="panel"><div class="section-head nohead"><div><span class="kicker">PARTNERS</span><h2>合作團隊</h2></div><small>${teams.length} 個合作單位</small></div><div class="pgrid partners-grid">${teams.map(t => partnerCard(t)).join('')}${joinCard()}</div>
+      <p class="source-note">標示「素材待補」的單位，Logo、形象照、聯繫窗口與官網將陸續補齊。</p></section>
     <section class="about-split"><div class="prose"><h2>計畫緣起</h2><p>濃煙、火光與快速變化的環境，讓人員位置、火源與距離的判讀充滿挑戰。消防 Edge AI 專案從這些資訊需求出發，探索在設備端整合影像、辨識與感測資訊。</p><p>守護之眼的原型與記者會展示，是合作的一個起點。平台希望整理技術成果與資源，讓消防員、開發者及關心專案的人能持續交流。</p></div>
       <aside class="sidebox"><h3>想加入合作？</h3><p>學研、產業或消防單位的合作提案，都可以從這裡開始。</p>${link('contact?purpose=' + encodeURIComponent('合作洽詢'), '聯絡我們', 'btn primary')}</aside></section></div>`;
 }
@@ -292,9 +310,11 @@ function team(id) {
   const t = byId(teams, id); if (!t) return missing();
   const owned = techs.filter(s => s.team === t.id).map(s => appOf(s.id));
   return hero(t.name, 'PARTNER', esc(t.title), ['partners', '合作團隊']) + `<div class="wrap page-body two-col"><article class="prose"><span class="tag">${esc(t.type)}</span><h2>團隊簡介</h2><p>${esc(t.brief)}</p>
-    ${owned.length ? `<h2>相關應用情境</h2>${owned.map(a => `<p><a href="#/applications/${a.id}"><strong>${esc(a.title)}</strong></a> ${badge(a.maturity)}<br>${esc(a.summary)}</p>`).join('')}` : '<h2>平台角色</h2><p>擔任設備詢價與合作聯繫窗口。具體合作方式、窗口與正式介紹待協會確認。</p>'}
+    ${owned.length ? `<h2>相關應用情境</h2>${owned.map(a => `<p><a href="#/applications/${a.id}"><strong>${esc(a.title)}</strong></a> ${badge(a.maturity)}<br>${esc(a.summary)}</p>`).join('')}` : ''}
+    ${t.role ? `<h2>平台角色</h2><p>${esc(t.role)}</p>` : ''}
+    ${t.pending ? `<p class="meta">${esc(t.pending)}</p>` : ''}
     <p class="source-note">${SOURCE_NOTE}</p></article>
-  <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3><p>希望了解合作方式或提供現場需求？</p>${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
+  <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3>${contactLines(t, t.name)}${t.phone || t.email ? '' : '<p>希望了解合作方式或提供現場需求，可透過平台窗口聯繫。</p>'}${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
 }
 function contact(params) {
   const item = params.get('item') || '', purpose = params.get('purpose') || '';
@@ -304,7 +324,7 @@ function contact(params) {
     <label for="item">相關應用情境／設備／團隊</label><input id="item" name="item" value="${esc(item)}" maxlength="150">
     <label for="message">訊息內容 *</label><textarea id="message" name="message" required maxlength="5000" placeholder="請簡單說明你的需求與想了解的內容"></textarea>
     <div class="actions"><button class="btn primary">預覽送出內容 →</button></div><div id="mail-output" aria-live="polite"></div></form>
-  <aside class="side-stack"><div class="sidebox"><h3>不用登入也能聯絡</h3><p>聯絡表單開放所有人使用。設備詢價由台灣守護者聯盟協會回覆。</p><div class="notice">示意版只顯示送出內容預覽，不會寄出。正式收件窗口與寄送方式待確認。</div></div></aside></div>`;
+  <aside class="side-stack"><div class="sidebox"><h3>平台聯絡窗口</h3>${contactLines()}<p>合作洽詢、設備詢價與網站相關問題，都由這個窗口回覆；也可以直接填寫左側表單，不用登入。</p><div class="notice">示意版只顯示送出內容預覽，不會寄出。正式寄送方式待實作。</div></div></aside></div>`;
 }
 
 /* ---------- 技術交流（技術資源＋討論區） ---------- */
@@ -364,7 +384,7 @@ function member() {
 const adminFields = {
   應用情境: ['標題', '分類', '日期', '介紹', '現場痛點與技術作法', '目前做到哪裡', '封面圖片'],
   設備: ['設備名稱', '分類', '用途', '規格', '價格（或「洽詢」）', '圖片'],
-  合作團隊: ['單位名稱', '類型', '主持人／負責人姓名職稱', '簡介', '官網', 'Logo 或形象照圖片'],
+  合作團隊: ['單位名稱', '類型（學研團隊／企業／協會／消防單位）', '稱謂（主持人或聯繫窗口）', '姓名職稱', '簡介', '平台角色說明', '官網', 'Logo 或形象照圖片'],
   計畫進程: ['里程碑名稱', '日期', '簡短說明']
 };
 function admin(kind) {
@@ -519,7 +539,7 @@ document.addEventListener('submit', e => {
     render(); toast('已送出回覆（示意，重新整理後重置）');
   }
   if (f.id === 'contact-form') {
-    const text = `主旨：【${data.purpose}】${data.item || '消防 Edge AI 平台'}\n收件窗口：${data.purpose === '設備詢價' ? '台灣守護者聯盟協會（待設定）' : '正式窗口待設定'}\n\n${data.message}\n\n相關項目：${data.item || '未指定'}\n姓名：${data.name}\n回覆信箱：${data.email}`;
+    const text = `主旨：【${data.purpose}】${data.item || '消防 Edge AI 平台'}\n收件窗口：${CONTACT.org}\n\n${data.message}\n\n相關項目：${data.item || '未指定'}\n姓名：${data.name}\n回覆信箱：${data.email}`;
     $('#mail-output').innerHTML = '<h2 class="spaced">送出內容預覽</h2><p class="notice">內容已整理，尚未寄出。正式寄送功能待實作。</p><div class="mail-preview">' + esc(text) + '</div>';
   }
   if (f.id === 'admin-form') $('#admin-output').innerHTML = Object.entries(data).map(([k, v]) => `<h4>${esc(k)}</h4><p style="white-space:pre-wrap">${esc(v instanceof File ? (v.name || '未選擇') : v) || '尚未填寫'}</p>`).join('');

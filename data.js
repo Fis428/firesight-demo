@@ -1,4 +1,4 @@
-/* 消防 Edge AI 平台｜內容資料（Round 3，2026-11-09：加入高科大林志學團隊成果頁）
+/* 消防 Edge AI 平台｜內容資料（Round 3，2026-11-09：高科大成果頁；合作團隊 5 個單位＋歡迎加入、聯絡方式登入後顯示）
  * 所有頁面內容都從這個檔案讀取。新增或修改內容只要改這裡，不用動版面程式。
  * 各類內容以 id 互相關聯。正式版由 Vic 改為資料庫與後台，欄位對照請見 HANDOFF.md。
  *
@@ -97,7 +97,7 @@ const applications = [
     intro: {
       heading: '守護之眼 FireSight',
       sub: '把影像、辨識與距離資訊放在同一個畫面',
-      body: ['守護之眼是專案的整合原型，將現場影像、AI 辨識結果與感測資訊整合在同一個畫面，協助消防人員判讀現場。目前整合的技術包含林志學團隊的火焰辨識與深度測距；濃煙下的人員辨識請見「濃煙下的人員與火煙辨識」。']
+      body: ['守護之眼是專案的整合原型，將現場影像、AI 辨識結果與感測資訊整合在同一個畫面，協助消防人員判讀現場。目前整合的技術包含高雄科技大學團隊（林志學）的火焰辨識與深度測距；濃煙下的人員辨識請見「濃煙下的人員與火煙辨識」。']
     },
     progress: {
       text: '記者會展板呈現燃燒櫃影像中的火焰辨識與測距範例，畫面中約 8.70 公尺為該次展示結果。',
@@ -311,25 +311,46 @@ const devices = [
     desc: '取得現場影像與深度資訊，支援火焰位置及距離判讀。',
     spec: '正式展示規格待確認', price: '洽詢' }
 ];
-const ACCESS_NOTE = '由台灣守護者聯盟協會（TGA）擔任詢價窗口。目前不提供線上付款；價格、供應與取得方式由窗口回覆。';
+const ACCESS_NOTE = '由臺灣守護者聯盟社會公益協會擔任詢價窗口。目前不提供線上付款；價格、供應與取得方式由窗口回覆。';
 
-/* 合作團隊（PARTNERS）：卡片同尺寸，Logo 或形象照＋名稱＋姓名職稱＋官網
- * pending：素材尚未到齊時顯示「素材待補」（預計 2026-11-10 收齊） */
+/* 平台聯絡窗口（與我們聯繫）：聯絡我們頁與設備詢價共用；電話與信箱登入後才顯示
+ * 守護者協會卡片的聯繫窗口另填（余亮璇 專案經理），信箱沿用協會信箱 */
+const CONTACT = {
+  org: '臺灣守護者聯盟社會公益協會',
+  name: '吳泓億',
+  phone: '0935-636-776',
+  email: 'guardianedgeai@gmail.com'
+};
+
+/* 合作團隊（PARTNERS）：卡片同尺寸，依陣列順序排列；最後固定加一張「歡迎加入」（由版面產生，不寫在這裡）
+ * personLabel：學研單位用「主持人」，企業與協會用「聯繫窗口」
+ * person：姓名職稱；空白時卡片顯示「主持人待補」或「聯繫窗口待補」
+ * role：單位頁「平台角色」說明（沒有負責技術模組的單位會顯示這段）
+ * phone、email：聯繫窗口的電話與信箱，登入後才顯示（正式版須由後端控管，見 HANDOFF）
+ * 窗口姓名對外顯示英文（person）；personZh 為中文姓名職稱，登入後才顯示
+ * pending：素材尚未到齊時顯示「素材待補」；到齊後刪掉這個欄位 */
 const teams = [
-  { id: 'hsu', name: '許志仲團隊', type: '學研團隊', title: '濃煙下的人員與火煙辨識',
-    person: '許志仲 副教授', org: '國立陽明交通大學・ACVLab',
-    logos: ['logo-nycu.png', 'logo-acvlab.png'], url: 'https://sites.google.com/view/acvlab',
-    brief: '以真火真煙訓練與多源感知融合，讓不同感測資訊彼此補位。', app: 'vision' },
-  { id: 'lin', name: '林志學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
-    person: '林志學 教授', org: '國立高雄科技大學・智慧計算與資安實驗室',
+  { id: 'infineon', name: '英飛凌科技', type: '企業', title: '核心技術合作夥伴',
+    personLabel: '聯繫窗口', person: 'Lydia Huang', email: 'Lydia.Huang@infineon.com',
+    logos: ['logo-infineon.svg'], url: 'https://www.infineon.com/',
+    brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
+    role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
+  { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
+    personLabel: '聯繫窗口', person: 'Liang Yu', personZh: '余亮璇 專案經理', email: CONTACT.email,
+    logos: ['guardians.png'], pending: '官網待補',
+    brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
+    role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
+  { id: 'lin', name: '高雄科技大學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
+    personLabel: '主持人', person: '林志學 教授', org: '國立高雄科技大學・智慧計算與資安實驗室',
     photo: 'nkust-lin.jpg', url: 'https://ec.nkust.edu.tw/p/404-1122-98332.php?Lang=zh-tw',
     brief: '開發火焰辨識與深度測距技術，整合消防邊緣 AI。', app: 'distance' },
-  { id: 'north', name: '北瀚科技', type: '產業合作', title: '從物件計數走向消防應用',
-    person: '', logoText: '企業 Logo', pending: '企業 Logo、執行長形象照與官網待補',
-    brief: '以既有的手推車辨識與計數試作，延伸探索火場人員辨識及計數。', app: 'count' },
-  { id: 'tga', name: '台灣守護者聯盟協會', type: '專案協作', title: '連結消防現場與開發團隊',
-    person: '', logos: ['guardians.png'], pending: '負責人形象照、姓名與官網待補',
-    brief: '串聯現場需求、學研及產業合作，推進消防科技交流；設備詢價窗口。' }
+  { id: 'hsu', name: '陽明交通大學團隊', type: '學研團隊', title: '濃煙下的人員與火煙辨識',
+    personLabel: '主持人', person: '許志仲 副教授', org: '國立陽明交通大學・ACVLab',
+    logos: ['logo-nycu.png', 'logo-acvlab.png'], url: 'https://sites.google.com/view/acvlab',
+    brief: '以真火真煙訓練與多源感知融合，讓不同感測資訊彼此補位。', app: 'vision' },
+  { id: 'north', name: '北瀚科技', type: '企業', title: '從物件計數走向消防應用',
+    personLabel: '聯繫窗口', person: '', logoText: '企業 Logo', pending: '企業 Logo、聯繫窗口與官網待補',
+    brief: '以既有的手推車辨識與計數試作，延伸探索火場人員辨識及計數。', app: 'count' }
 ];
 
 /* 計畫進程（ROADMAP）：沿用原網站的日期與說明，改用交大示意圖的呈現方式
