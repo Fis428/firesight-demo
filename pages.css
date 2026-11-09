@@ -150,3 +150,12 @@ nav{align-items:center}.has-menu{position:relative;display:flex;align-items:cent
 @media(max-width:400px){.pgrid{grid-template-columns:1fr}}
 .app-sec .compare{max-width:760px}.app-sec .compare+.compare{margin-top:24px}.stat-chart img{object-fit:contain}
 @media(max-width:800px){.stats{grid-template-columns:1fr 1fr}.stats strong{font-size:19px}}
+
+/* Round 3：合作團隊 5 個單位＋歡迎加入，桌機每排 3 張 */
+.pgrid.partners-grid{grid-template-columns:repeat(3,1fr)}
+.pc-join{border-style:dashed;border-width:2px;color:inherit}.pc-join .pc-media{background:#f6fafa}
+.pc-plus{width:64px;height:64px;border-radius:50%;border:2px dashed var(--blue);color:var(--blue);display:grid;place-items:center;font-size:30px;font-weight:300}
+.pc-join.compact .pc-media{height:130px}.pc-join .pc-person{color:var(--blue);font-weight:700}
+.contact-lines li{padding:3px 0;font-size:14px}.contact-lines a{color:var(--blue);word-break:break-all}
+@media(max-width:1050px){.pgrid.partners-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:400px){.pgrid.partners-grid{grid-template-columns:1fr}}
