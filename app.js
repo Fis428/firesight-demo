@@ -294,7 +294,7 @@ function team(id) {
   return hero(t.name, 'PARTNER', esc(t.title), ['partners', '合作團隊']) + `<div class="wrap page-body two-col"><article class="prose"><span class="tag">${esc(t.type)}</span><h2>團隊簡介</h2><p>${esc(t.brief)}</p>
     ${owned.length ? `<h2>相關應用情境</h2>${owned.map(a => `<p><a href="#/applications/${a.id}"><strong>${esc(a.title)}</strong></a> ${badge(a.maturity)}<br>${esc(a.summary)}</p>`).join('')}` : ''}
     ${t.role ? `<h2>平台角色</h2><p>${esc(t.role)}</p>` : ''}
-    ${t.pending ? `<p class="meta">待補：${esc(t.pending)}</p>` : ''}
+    ${t.pending ? `<p class="meta">${esc(t.pending)}</p>` : ''}
     <p class="source-note">${SOURCE_NOTE}</p></article>
   <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3>${t.email ? contactLines() : `<p>${esc(t.personLabel || '聯繫窗口')}：${t.person ? esc(t.person) : '待補'}。希望了解合作方式或提供現場需求，可透過平台窗口聯繫。</p>`}${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
 }
