@@ -231,7 +231,7 @@ function home(params) {
     <div class="join reveal">${[
       ['applications', '看更多應用情境', '整合原型、技術展示與活動紀錄'],
       ['community', '加入技術交流', '提出現場需求或技術問題'],
-      ['devices', '詢價相關設備', '由臺灣守護者聯盟社會公益協會擔任窗口'],
+      ['devices', '查看設備與開發資源', '產品介紹、技術文件與開發工具'],
       ['contact', '合作聯絡', '學研、產業或消防單位的合作提案']
     ].map(([p, h, d]) => `<a class="join-card" href="#/${p}"><strong>${h}</strong><span>${d}</span><i aria-hidden="true">→</i></a>`).join('')}</div></section>`;
 }
@@ -253,7 +253,7 @@ function applicationsPage(id) {
       <details class="tech-details"><summary>技術細節（給消防與技術人員）</summary><h3>技術做法</h3><p>${esc(t.method)}</p>
       <h3>使用設備</h3><ul>${t.devices.map(d => `<li><a href="#/devices/${d}">${esc(byId(devices, d).name)}</a></li>`).join('')}</ul>
       <h3>後續應用方向</h3><p>${esc(t.future)}</p><p class="meta">技術文件、程式碼與介接說明待團隊提供。</p></details>`).join('')}
-    ${a.showcase ? `<h3>展示的三項技術方向</h3><div class="grid3">${a.showcase.map(x => { const o = byId(applications, x); return `<a class="join-card" href="#/applications/${o.id}"><strong>${esc(o.title)}</strong><span>${esc(o.summary)}</span><i aria-hidden="true">→</i></a>`; }).join('')}</div>` : ''}`]);
+    ${a.showcase ? `<h3>${esc(a.showcaseHeading || '展示的三項技術方向')}</h3><div class="grid3">${a.showcase.map(x => { const o = byId(applications, x); return `<a class="join-card" href="#/applications/${o.id}"><strong>${esc(o.title)}</strong><span>${esc(o.summary)}</span><i aria-hidden="true">→</i></a>`; }).join('')}</div>` : ''}`]);
   /* 02 互動對照（沿用原網站拖曳比較） */
   if (ts.length) S.push(['compare', '互動對照', `<h2>一般畫面 vs AI 辨識</h2><p>拖曳中間的把手，比較一般攝影機畫面與 AI 辨識後的差別。</p>${ts.map(compare).join('')}`]);
   /* 03 目前做到哪裡 */
@@ -286,15 +286,26 @@ function applicationsPage(id) {
         <div class="app-cta">${ts[0] ? link('community?scenario=' + ts[0].id, '看相關討論') : ''}${link('contact?item=' + encodeURIComponent(a.title), '聯繫專案窗口', 'btn primary')}</div></div></div>`;
 }
 
-/* ---------- 設備／商城（介紹與詢價共用） ---------- */
+/* ---------- 設備與開發資源（第一階段：產品介紹、技術文件、開發工具、官方連結；商務欄位預留不顯示） ---------- */
 const device = d => `<div class="device">${d.chip}<small>概念示意圖</small></div>`;
-const inquire = (d, cls = 'btn primary') => link(`contact?purpose=${encodeURIComponent('設備詢價')}&item=${encodeURIComponent(d.name)}`, '詢價', cls);
+const extLinks = (list, cls = 'res-link') => (list || []).map(l => `<a class="${cls}" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} <span aria-hidden="true">↗</span></a>`).join('');
+const brandLine = x => { const p = x.partner && byId(teams, x.partner); return `<span class="meta">${esc(x.brand || '')}${p ? `・<a href="#/team/${p.id}">${esc(p.name)}</a>` : ''}</span>`; };
+const resRow = r => `<article class="topic res-row"><div><span class="tag">${esc(r.kind)}</span><h3><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} <span aria-hidden="true">↗</span></a></h3><p class="res-desc">${esc(r.desc)}</p>${brandLine(r)}</div></article>`;
 function devicesPage(id) {
-  if (!id) return hero('設備／商城', 'DEVICES & SHOP', '專案使用的開發設備與可取得的品項。目前以詢價方式提供，由臺灣守護者聯盟社會公益協會回覆。') + `<div class="wrap page-body"><div class="notice">${ACCESS_NOTE}</div><div class="grid3">${devices.map(d => `<article class="card reveal"><a class="art" href="#/devices/${d.id}" tabindex="-1" aria-hidden="true">${device(d)}</a><div class="card-body"><span class="tag">${esc(d.sub)}</span><h3><a href="#/devices/${d.id}">${esc(d.name)}</a></h3><p>${esc(d.desc)}</p><div class="shop-row"><span class="price">價格：${esc(d.price)}</span>${inquire(d, 'btn small primary')}</div>${link('devices/' + d.id, '查看設備資訊', 'text-btn')}</div></article>`).join('')}</div></div>`;
+  if (!id) return hero('設備與開發資源', 'DEVICES & RESOURCES', '專案使用的開發設備、技術文件與開發工具，協助消防單位與開發者了解可使用的技術資源。') + `<div class="wrap page-body">
+    <div class="section-title pt-none"><h2>設備</h2><span class="badge-count">${devices.length} 項</span></div>
+    <div class="grid3">${devices.map(d => `<article class="card reveal"><a class="art" href="#/devices/${d.id}" tabindex="-1" aria-hidden="true">${device(d)}</a><div class="card-body"><span class="tag">${esc(d.kind)}</span><h3><a href="#/devices/${d.id}">${esc(d.name)}</a></h3>${brandLine(d)}<p>${esc(d.desc)}</p><div class="res-links">${extLinks(d.links.slice(0, 1))}</div>${link('devices/' + d.id, '查看設備資訊', 'text-btn')}</div></article>`).join('')}</div>
+    <div class="section-title spaced" id="tools"><h2>開發工具與技術文件</h2><span class="badge-count">${devResources.length} 項</span></div>
+    <div class="forum">${devResources.map(resRow).join('')}</div>
+    <div class="notice spaced">${RESOURCE_NOTE}</div>
+    <p class="meta">使用上的問題可以到 <a href="#/community">技術交流</a> 提問，或 <a href="#/contact?purpose=${encodeURIComponent('設備與開發資源')}">聯絡我們</a>。</p></div>`;
   const d = byId(devices, id); if (!d) return missing();
   const used = techs.filter(t => t.devices.includes(d.id)).map(t => appOf(t.id));
-  return hero(d.name, 'DEVICE', esc(d.sub), ['devices', '設備／商城']) + `<div class="wrap page-body"><div class="product-hero"><div class="art">${device(d)}</div><div class="prose"><span class="tag">${esc(d.sub)}</span><h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><p class="price big">價格：${esc(d.price)}</p>${inquire(d)}<p class="meta">${ACCESS_NOTE}</p></div></div>
-  <h2 class="spaced">設備資訊</h2><table class="spec"><tbody><tr><td>用途</td><td>${esc(d.desc)}</td></tr><tr><td>規格</td><td>${esc(d.spec)}</td></tr><tr><td>用在哪些應用情境</td><td>${used.map(a => `<a href="#/applications/${a.id}">${esc(a.title)}</a>`).join('、')}</td></tr><tr><td>取得方式</td><td>${ACCESS_NOTE}</td></tr></tbody></table></div>`;
+  const rel = devResources.filter(r => r.partner && r.partner === d.partner);
+  return hero(d.name, 'DEVICE', esc(d.sub), ['devices', '設備與開發資源']) + `<div class="wrap page-body"><div class="product-hero"><div class="art">${device(d)}</div><div class="prose"><span class="tag">${esc(d.kind)}</span><h2>${esc(d.name)}</h2>${brandLine(d)}<p>${esc(d.desc)}</p><div class="res-links">${extLinks(d.links)}</div></div></div>
+  <h2 class="spaced">設備資訊</h2><table class="spec"><tbody><tr><td>類別</td><td>${esc(d.kind)}</td></tr><tr><td>品牌</td><td>${esc(d.brand)}</td></tr><tr><td>用途</td><td>${esc(d.desc)}</td></tr><tr><td>規格</td><td>${esc(d.spec)}</td></tr><tr><td>用在哪些應用情境</td><td>${used.map(a => `<a href="#/applications/${a.id}">${esc(a.title)}</a>`).join('、') || '—'}</td></tr></tbody></table>
+  ${rel.length ? `<h2 class="spaced">相關開發工具與文件</h2><div class="forum">${rel.map(resRow).join('')}</div>` : ''}
+  <div class="notice spaced">${RESOURCE_NOTE}</div></div>`;
 }
 
 /* ---------- 合作團隊（計畫進程＋合作夥伴）、團隊頁、聯絡 ---------- */
@@ -308,23 +319,25 @@ function partners() {
 }
 function team(id) {
   const t = byId(teams, id); if (!t) return missing();
-  const owned = techs.filter(s => s.team === t.id).map(s => appOf(s.id));
+  const myDev = devices.filter(d => d.partner === t.id), myRes = devResources.filter(r => r.partner === t.id);
+  const owned = [...new Set([...techs.filter(s => s.team === t.id), ...techs.filter(s => s.devices.some(d => myDev.some(m => m.id === d)))].map(s => appOf(s.id)))];
   return hero(t.name, 'PARTNER', esc(t.title), ['partners', '合作團隊']) + `<div class="wrap page-body two-col"><article class="prose"><span class="tag">${esc(t.type)}</span><h2>團隊簡介</h2><p>${esc(t.brief)}</p>
     ${owned.length ? `<h2>相關應用情境</h2>${owned.map(a => `<p><a href="#/applications/${a.id}"><strong>${esc(a.title)}</strong></a> ${badge(a.maturity)}<br>${esc(a.summary)}</p>`).join('')}` : ''}
     ${t.role ? `<h2>平台角色</h2><p>${esc(t.role)}</p>` : ''}
+    ${myDev.length || myRes.length ? `<h2>提供的設備與開發資源</h2><ul>${myDev.map(d => `<li><a href="#/devices/${d.id}">${esc(d.name)}</a></li>`).join('')}${myRes.map(r => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a></li>`).join('')}</ul>` : ''}
     ${t.pending ? `<p class="meta">${esc(t.pending)}</p>` : ''}
     <p class="source-note">${SOURCE_NOTE}</p></article>
   <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3>${contactLines(t, t.name)}${t.phone || t.email ? '' : '<p>希望了解合作方式或提供現場需求，可透過平台窗口聯繫。</p>'}${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
 }
 function contact(params) {
   const item = params.get('item') || '', purpose = params.get('purpose') || '';
-  const opts = ['合作洽詢', '設備詢價', '技術交流', '其他問題'];
+  const opts = ['合作洽詢', '設備與開發資源', '技術交流', '其他問題'];
   return hero('聯絡我們', 'CONTACT', '分享現場需求、技術問題，或聊聊下一個合作可能。') + `<div class="wrap page-body two-col"><form id="contact-form"><div class="split-fields"><div><label for="name">姓名 *</label><input id="name" name="name" required maxlength="80" autocomplete="name" value="${esc(me().name)}"></div><div><label for="email">回覆信箱 *</label><input id="email" name="email" type="email" required autocomplete="email"></div></div>
     <label for="purpose">聯絡目的</label><select id="purpose" name="purpose">${opts.map(o => `<option ${o === purpose ? 'selected' : ''}>${o}</option>`).join('')}</select>
     <label for="item">相關應用情境／設備／團隊</label><input id="item" name="item" value="${esc(item)}" maxlength="150">
     <label for="message">訊息內容 *</label><textarea id="message" name="message" required maxlength="5000" placeholder="請簡單說明你的需求與想了解的內容"></textarea>
     <div class="actions"><button class="btn primary">預覽送出內容 →</button></div><div id="mail-output" aria-live="polite"></div></form>
-  <aside class="side-stack"><div class="sidebox"><h3>平台聯絡窗口</h3>${contactLines()}<p>合作洽詢、設備詢價與網站相關問題，都由這個窗口回覆；也可以直接填寫左側表單，不用登入。</p><div class="notice">示意版只顯示送出內容預覽，不會寄出。正式寄送方式待實作。</div></div></aside></div>`;
+  <aside class="side-stack"><div class="sidebox"><h3>平台聯絡窗口</h3>${contactLines()}<p>合作洽詢、設備與開發資源及網站相關問題，都由這個窗口回覆；也可以直接填寫左側表單，不用登入。</p><div class="notice">示意版只顯示送出內容預覽，不會寄出。正式寄送方式待實作。</div></div></aside></div>`;
 }
 
 /* ---------- 技術交流（技術資源＋討論區） ---------- */
@@ -350,8 +363,8 @@ function community(id, params) {
   }
   if (!id) {
     cm.scenario = params.get('scenario') || '';
-    return hero('技術交流', 'COMMUNITY', '技術資源與討論集中在這裡：先查技術細節，找不到答案再發問。') + `<div class="wrap page-body">
-      <div class="section-title pt-none"><h2>技術資源</h2><span class="badge-count">技術文件整理中</span></div>
+    return hero('技術交流', 'COMMUNITY', '技術說明與討論集中在這裡：先查技術細節，找不到答案再發問。') + `<div class="wrap page-body">
+      <div class="section-title pt-none"><h2>技術說明</h2>${link('devices', '設備與開發資源', 'text-btn')}</div>
       <div class="grid3 res-grid">${techs.map(t => `<a class="res-card" href="#/applications/${t.app}"><span class="tag">${esc(t.tech)}</span><strong>${esc(t.title)}</strong><span>${esc(t.method)}</span><em>使用設備：${t.devices.map(d => esc(byId(devices, d).chip)).join('、')}</em></a>`).join('')}</div>
       <div class="two-col cm spaced"><div><div class="section-title pt-none"><h2>討論區</h2></div>
       <div class="toolbar"><input aria-label="搜尋討論" id="topic-search" placeholder="搜尋標題或內容" value="${esc(cm.q)}">${link('community/new' + (cm.scenario ? '?scenario=' + cm.scenario : ''), '發起討論', 'btn primary', 'data-gate="post"')}</div>
@@ -359,7 +372,7 @@ function community(id, params) {
         <label class="inline">技術<select id="scn-filter"><option value="">全部</option>${techs.map(s => `<option value="${s.id}" ${s.id === cm.scenario ? 'selected' : ''}>${esc(s.title)}</option>`).join('')}</select></label>
         <label class="inline">排序<select id="sort"><option value="new" ${cm.sort === 'new' ? 'selected' : ''}>最新</option><option value="open" ${cm.sort === 'open' ? 'selected' : ''}>待回覆優先</option><option value="replies" ${cm.sort === 'replies' ? 'selected' : ''}>回覆最多</option></select></label></div>
       <div class="forum" id="topic-list">${topicRows()}</div></div>
-    <aside class="side-stack"><div class="sidebox"><h3>發文需要登入</h3><p>瀏覽討論不需要登入；發文與回覆需要登入，並會顯示你的名稱與身分。</p></div><div class="sidebox"><h3>設備</h3><ul class="plain">${devices.map(d => `<li><a href="#/devices/${d.id}">${esc(d.name)}</a></li>`).join('')}</ul></div><div class="notice">正式版第一階段討論區先顯示「即將開放」，發文與回覆列於第二階段；此處為互動示意。</div></aside></div></div>`;
+    <aside class="side-stack"><div class="sidebox"><h3>發文需要登入</h3><p>瀏覽討論不需要登入；發文與回覆需要登入，並會顯示你的名稱與身分。</p></div><div class="sidebox"><h3>設備與開發資源</h3><ul class="plain">${devices.map(d => `<li><a href="#/devices/${d.id}">${esc(d.name)}</a></li>`).join('')}<li><a href="#/devices">開發工具與技術文件 →</a></li></ul></div><div class="notice">正式版第一階段討論區先顯示「即將開放」，發文與回覆列於第二階段；此處為互動示意。</div></aside></div></div>`;
   }
   const t = byId(topics, id); if (!t) return missing();
   const s = byId(techs, t.scenario);
@@ -378,13 +391,13 @@ function member() {
   return hero('會員中心', 'MEMBER', `${esc(p.name)} · ${esc(p.identity)}`) + `<div class="wrap page-body two-col"><div>
     <div class="section-title"><h2>我的發文</h2>${link('community/new', '發起討論', 'btn primary', 'data-gate="post"')}</div>
     <div class="forum">${mine.length ? mine.map(t => `<article class="topic"><div><span class="tag">${esc(t.cat)}</span><h3><a href="#/community/${t.id}">${esc(t.title)}</a></h3><span class="meta">${esc(t.date)}</span></div><div class="meta">${t.replies.length} 則回覆</div><div><span class="status st-${t.status}">${t.status === 'answered' ? '已解答' : '待回覆'}</span></div></article>`).join('') : '<div class="empty">還沒有發文。示意版的發文只保留在目前分頁。</div>'}</div>
-    <div class="section-title"><h2>我的設備詢價</h2></div><div class="notice">詢價紀錄與 TGA 的回覆流程，待與後端確認後加入。</div></div>
+    </div>
   <aside class="side-stack"><div class="sidebox"><h3>帳號資訊</h3><table class="spec mini"><tbody><tr><td>名稱</td><td>${esc(p.name)}</td></tr><tr><td>身分</td><td>${esc(p.identity)}</td></tr><tr><td>權限</td><td>${auth.role === 'admin' ? '管理員' : '會員'}</td></tr><tr><td>登入方式</td><td>Google（示意）</td></tr></tbody></table><div class="actions"><button class="btn" data-edit-profile>修改資料</button><button class="btn" data-logout>登出</button></div></div></aside></div>`;
 }
 const adminFields = {
   應用情境: ['標題', '分類', '日期', '介紹', '現場痛點與技術作法', '目前做到哪裡', '封面圖片'],
-  設備: ['設備名稱', '分類', '用途', '規格', '價格（或「洽詢」）', '圖片'],
-  合作團隊: ['單位名稱', '類型（學研團隊／企業／協會／消防單位）', '稱謂（主持人或聯繫窗口）', '姓名職稱', '簡介', '平台角色說明', '官網', 'Logo 或形象照圖片'],
+  設備與資源: ['名稱', '類別（晶片與開發板／運算平台／感測模組／開發工具／技術文件）', '品牌', '所屬合作單位', '用途說明', '規格', '官方連結（可多筆）', '圖片'],
+  合作團隊: ['單位名稱', '類型（核心團隊／學界夥伴／產業合作）', '稱謂（主持人或聯繫窗口）', '姓名職稱', '簡介', '平台角色說明', '官網', 'Logo 或形象照圖片'],
   計畫進程: ['里程碑名稱', '日期', '簡短說明']
 };
 function admin(kind) {
@@ -396,9 +409,9 @@ function admin(kind) {
   return hero('內容管理後臺', 'ADMIN', '維護網站內容與管理討論。') + adminNav(kind) + `<div class="wrap page-body pt0 two-col"><form id="admin-form"><h2>新增${kind}</h2>${adminFields[kind].map((f, i) => `<label for="field${i}">${f}${i === 0 ? ' *' : ''}</label>${f.includes('圖片') ? `<input id="field${i}" name="${f}" type="file" accept="image/*">` : i > 1 ? `<textarea id="field${i}" name="${f}"></textarea>` : `<input id="field${i}" name="${f}" ${i === 0 ? 'required' : ''}>`}`).join('')}${extra}<div class="actions"><button class="btn primary">預覽內容</button></div></form><aside class="sidebox"><h3>內容預覽</h3><div id="admin-output"><p>填寫左側欄位後，點選「預覽內容」。</p></div></aside></div>`;
 }
 const adminNav = k => `<div class="wrap"><div class="admin-nav">${[...Object.keys(adminFields), '討論'].map(x => `<a class="chip ${x === k ? 'selected' : ''}" href="#/admin/${x}">${x}${x === '討論' ? '管理' : ''}</a>`).join('')}</div></div>`;
-function search() { return hero('搜尋', 'SEARCH', '搜尋應用情境、設備、團隊與討論。') + `<div class="wrap page-body"><div class="toolbar"><input id="global-search" aria-label="搜尋平台內容" placeholder="例如：測距、E84、濃煙、記者會"></div><div id="search-results" class="forum">${searchRows('')}</div></div>`; }
+function search() { return hero('搜尋', 'SEARCH', '搜尋應用情境、設備與開發資源、團隊與討論。') + `<div class="wrap page-body"><div class="toolbar"><input id="global-search" aria-label="搜尋平台內容" placeholder="例如：測距、E84、濃煙、記者會"></div><div id="search-results" class="forum">${searchRows('')}</div></div>`; }
 function searchRows(q) {
-  const all = [...applications.map(a => ({ t: a.title + '｜' + a.summary + (a.techs || []).map(x => byId(techs, x).tech).join(''), show: a.title, p: 'applications/' + a.id, k: '應用情境' })), ...devices.map(d => ({ t: d.name, p: 'devices/' + d.id, k: '設備' })), ...teams.map(t => ({ t: t.name + '｜' + t.title, p: 'team/' + t.id, k: '團隊' })), ...topics.map(t => ({ t: t.title, p: 'community/' + t.id, k: '討論' }))].filter(x => x.t.toLowerCase().includes(q.toLowerCase()));
+  const all = [...applications.map(a => ({ t: a.title + '｜' + a.summary + (a.techs || []).map(x => byId(techs, x).tech).join(''), show: a.title, p: 'applications/' + a.id, k: '應用情境' })), ...devices.map(d => ({ t: d.name + '｜' + d.brand, show: d.name, p: 'devices/' + d.id, k: '設備' })), ...devResources.map(r => ({ t: r.name + '｜' + r.brand, show: r.name, p: 'devices', k: '開發資源' })), ...teams.map(t => ({ t: t.name + '｜' + t.title, p: 'team/' + t.id, k: '團隊' })), ...topics.map(t => ({ t: t.title, p: 'community/' + t.id, k: '討論' }))].filter(x => x.t.toLowerCase().includes(q.toLowerCase()));
   return all.length ? all.map(x => `<div class="topic"><div><span class="tag">${x.k}</span><h3><a href="#/${x.p}">${esc(x.show || x.t)}</a></h3></div></div>`).join('') : '<div class="empty">找不到符合的內容，請換一個關鍵字。</div>';
 }
 function missing() { return hero('找不到這個頁面', 'PAGE NOT FOUND', '請從導覽列選擇其他內容。') + `<div class="wrap page-body">${link('', '返回首頁')}</div>`; }

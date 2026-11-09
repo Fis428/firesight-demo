@@ -93,7 +93,9 @@ const applications = [
     points: ['現場影像與辨識', '目標距離資訊', '機器人位置與朝向'],
     foot: '從原型開發，走向更多應用情境',
     cover: 'architecture.jpeg',
-    techs: ['distance'],
+    techs: [],
+    showcaseHeading: '整合的技術成果',
+    showcase: ['distance', 'vision'],
     intro: {
       heading: '守護之眼 FireSight',
       sub: '把影像、辨識與距離資訊放在同一個畫面',
@@ -122,11 +124,11 @@ const applications = [
       sub: '三項技術方向首次公開',
       body: ['此次以記者會技術展板作為展示素材，彙整火焰辨識與測距、多源感知融合，以及物件辨識與計數三項方向。']
     },
-    showcase: ['firesight', 'vision', 'count'],
+    showcase: ['distance', 'vision', 'count'],
     progress: {
       image: { src: 'distance.jpeg', alt: '記者會技術展板擷取', caption: '技術展板擷取，非活動現場照片。' }
     },
-    teams: ['lin', 'hsu', 'north', 'tga'],
+    teams: ['infineon', 'tga', 'lin', 'hsu', 'north'],
     pending: '活動照片、正式新聞稿與活動紀錄待補。'
   },
   {
@@ -299,30 +301,62 @@ const applications = [
   }
 ];
 
-/* 設備／商城：介紹與詢價共用同一份資料（第一階段不做線上付款） */
+/* 設備與開發資源（11/10 決議：第一階段由「設備／商城」整合而成）
+ * 第一階段只呈現產品介紹、技術文件、開發工具與官方連結；不顯示價格與詢價。
+ * kind：晶片與開發板／運算平台／感測模組
+ * brand：品牌；partner：對應 teams.id（合作單位提供的產品，單位頁會列出）
+ * links[]：官方連結 { label, url }
+ * commerce：第二階段（產品推廣與商務媒合）預留欄位，第一階段前台不顯示
+ *   status：display（僅展示）／inquiry（可詢價）／agency（代理銷售）；price；inquiry（詢價窗口） */
 const devices = [
-  { id: 'e84', name: 'PSoC Edge E84 開發套件', sub: '邊緣 AI 開發', chip: 'E84',
-    desc: '用於嵌入式 AI 模型部署與推論驗證。',
-    spec: '正式規格待確認', price: '洽詢' },
-  { id: 'orin', name: 'Jetson Orin 運算平台', sub: '影像運算與整合', chip: 'ORIN',
-    desc: '專案中用於影像辨識、距離資訊整合與結果呈現。',
-    spec: '正式展示規格待確認', price: '洽詢' },
-  { id: 'depth', name: '深度影像感測模組', sub: '現場影像與深度資訊', chip: 'DEPTH',
-    desc: '取得現場影像與深度資訊，支援火焰位置及距離判讀。',
-    spec: '正式展示規格待確認', price: '洽詢' }
+  { id: 'e84', name: 'PSOC™ Edge E84 開發套件', sub: '邊緣 AI 開發', chip: 'E84', kind: '晶片與開發板',
+    brand: 'Infineon 英飛凌', partner: 'infineon',
+    desc: '搭載 Arm Cortex-M55／M33 與 Ethos-U55 NPU 的邊緣 AI 微控制器平台，本專案用於模型部署與板上推論驗證。',
+    spec: '詳細規格以英飛凌官方頁面為準',
+    links: [
+      { label: 'KIT_PSE84_AI 官方產品頁', url: 'https://www.infineon.com/KIT_PSE84_AI' },
+      { label: 'Kit 使用手冊', url: 'https://www.infineon.com/KIT_PSE84_AI_UG' },
+      { label: 'PSOC™ Edge E84 系列', url: 'https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex/32-bit-psoc-edge-arm/psoc-edge-e84' }
+    ],
+    commerce: { status: 'display', price: '', inquiry: '' } },
+  { id: 'orin', name: 'Jetson Orin 運算平台', sub: '影像運算與整合', chip: 'ORIN', kind: '運算平台',
+    brand: 'NVIDIA', partner: '',
+    desc: '專案中用於火焰辨識、距離資訊整合與結果呈現。',
+    spec: '使用型號待團隊確認；規格以 NVIDIA 官方頁面為準',
+    links: [{ label: 'Jetson Orin 官方頁', url: 'https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin' }],
+    commerce: { status: 'display', price: '', inquiry: '' } },
+  { id: 'depth', name: 'Gemini 435Le 深度相機', sub: '現場影像與深度資訊', chip: 'DEPTH', kind: '感測模組',
+    brand: 'Orbbec', partner: '',
+    desc: '高科大團隊用於取得彩色與原生深度影像，支援火焰位置及距離判讀。',
+    spec: '規格以 Orbbec 官方文件為準',
+    links: [{ label: 'Gemini 435Le 官方文件', url: 'https://doc.orbbec.com/documentation/Orbbec%20Gemini%20435Le%20Documentation/About%20Gemini%20435Le' }],
+    commerce: { status: 'display', price: '', inquiry: '' } }
 ];
-const ACCESS_NOTE = '由臺灣守護者聯盟社會公益協會擔任詢價窗口。目前不提供線上付款；價格、供應與取得方式由窗口回覆。';
 
-/* 平台聯絡窗口（與我們聯繫）：聯絡我們頁與設備詢價共用；電話與信箱登入後才顯示
+/* 開發工具與技術文件：kind＝開發工具／技術文件；partner 同上 */
+const devResources = [
+  { id: 'modustoolbox', name: 'ModusToolbox™ 開發環境', kind: '開發工具', brand: 'Infineon 英飛凌', partner: 'infineon',
+    desc: '英飛凌微控制器的開發環境，PSOC™ Edge E84 的程式開發、燒錄與除錯使用。', url: 'https://www.infineon.com/ModusToolbox' },
+  { id: 'mtb-examples', name: 'ModusToolbox™ 程式範例', kind: '技術文件', brand: 'Infineon 英飛凌', partner: 'infineon',
+    desc: '英飛凌官方 GitHub 程式範例集。', url: 'https://github.com/Infineon/Code-Examples-for-ModusToolbox-Software' },
+  { id: 'deepcraft', name: 'DEEPCRAFT™ Edge AI 工具', kind: '開發工具', brand: 'Infineon 英飛凌', partner: 'infineon',
+    desc: '英飛凌的 Edge AI 模型開發與部署工具。', url: 'https://www.infineon.com/cms/en/design-support/software/deepcraft-edge-ai-solutions/' },
+  { id: 'jetpack', name: 'NVIDIA JetPack SDK', kind: '開發工具', brand: 'NVIDIA', partner: '',
+    desc: 'Jetson 平台的系統與 AI 開發套件。', url: 'https://developer.nvidia.com/embedded/jetpack' }
+];
+const RESOURCE_NOTE = '第一階段提供產品介紹、技術文件、開發工具與官方連結；規格以各廠商官方資料為準。採購、代理與詢價服務，待合作條件確認後開放。';
+
+/* 平台聯絡窗口（與我們聯繫）：聯絡我們頁使用；未登入顯示英文姓名，登入後顯示中文姓名、電話與信箱
  * 守護者協會卡片的聯繫窗口另填（余亮璇 專案經理），信箱沿用協會信箱 */
 const CONTACT = {
   org: '臺灣守護者聯盟社會公益協會',
-  name: '吳泓億',
+  name: '吳泓億', person: 'Joy Wu', personZh: '吳泓億',
   phone: '0935-636-776',
   email: 'guardianedgeai@gmail.com'
 };
 
 /* 合作團隊（PARTNERS）：卡片同尺寸，依陣列順序排列；最後固定加一張「歡迎加入」（由版面產生，不寫在這裡）
+ * type：核心團隊（英飛凌、守護者協會）／學界夥伴（大學）／產業合作（企業）
  * personLabel：學研單位用「主持人」，企業與協會用「聯繫窗口」
  * person：姓名職稱；空白時卡片顯示「主持人待補」或「聯繫窗口待補」
  * role：單位頁「平台角色」說明（沒有負責技術模組的單位會顯示這段）
@@ -330,25 +364,25 @@ const CONTACT = {
  * 窗口姓名對外顯示英文（person）；personZh 為中文姓名職稱，登入後才顯示
  * pending：素材尚未到齊時顯示「素材待補」；到齊後刪掉這個欄位 */
 const teams = [
-  { id: 'infineon', name: '英飛凌科技', type: '企業', title: '核心技術合作夥伴',
+  { id: 'infineon', name: '英飛凌科技', type: '核心團隊', title: 'Edge AI 晶片與開發資源',
     personLabel: '聯繫窗口', person: 'Lydia Huang', email: 'Lydia.Huang@infineon.com',
     logos: ['logo-infineon.svg'], url: 'https://www.infineon.com/',
     brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
     role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
-  { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
+  { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '核心團隊', title: '連結消防現場與開發團隊',
     personLabel: '聯繫窗口', person: 'Liang Yu', personZh: '余亮璇 專案經理', email: CONTACT.email,
     logos: ['guardians.png'], pending: '官網待補',
     brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
     role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
-  { id: 'lin', name: '高雄科技大學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
+  { id: 'lin', name: '高雄科技大學團隊', type: '學界夥伴', title: '火焰辨識與即時測距',
     personLabel: '主持人', person: '林志學 教授', org: '國立高雄科技大學・智慧計算與資安實驗室',
     photo: 'nkust-lin.jpg', url: 'https://ec.nkust.edu.tw/p/404-1122-98332.php?Lang=zh-tw',
     brief: '開發火焰辨識與深度測距技術，整合消防邊緣 AI。', app: 'distance' },
-  { id: 'hsu', name: '陽明交通大學團隊', type: '學研團隊', title: '濃煙下的人員與火煙辨識',
+  { id: 'hsu', name: '陽明交通大學團隊', type: '學界夥伴', title: '濃煙下的人員與火煙辨識',
     personLabel: '主持人', person: '許志仲 副教授', org: '國立陽明交通大學・ACVLab',
     logos: ['logo-nycu.png', 'logo-acvlab.png'], url: 'https://sites.google.com/view/acvlab',
     brief: '以真火真煙訓練與多源感知融合，讓不同感測資訊彼此補位。', app: 'vision' },
-  { id: 'north', name: '北瀚科技', type: '企業', title: '從物件計數走向消防應用',
+  { id: 'north', name: '北瀚科技', type: '產業合作', title: '從物件計數走向消防應用',
     personLabel: '聯繫窗口', person: '', logoText: '企業 Logo', pending: '企業 Logo、聯繫窗口與官網待補',
     brief: '以既有的手推車辨識與計數試作，延伸探索火場人員辨識及計數。', app: 'count' }
 ];

@@ -171,3 +171,7 @@ nav{align-items:center}.has-menu{position:relative;display:flex;align-items:cent
 @media(max-width:1050px){.pgrid.partners-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:400px){.pgrid.partners-grid{grid-template-columns:1fr}}
 .lock-btn{margin-top:4px;font-size:13px}
+
+/* 11/10：設備與開發資源 */
+.res-links{display:flex;flex-wrap:wrap;gap:8px 16px;margin:6px 0 10px}.res-link{font-size:13px;font-weight:700;color:var(--blue)}
+.res-row h3 a{color:var(--navy)}.res-desc{margin:4px 0;font-size:14px;color:var(--ink)}
