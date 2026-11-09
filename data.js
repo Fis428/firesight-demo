@@ -234,7 +234,7 @@ const devices = [
 ];
 const ACCESS_NOTE = '由臺灣守護者聯盟社會公益協會擔任詢價窗口。目前不提供線上付款；價格、供應與取得方式由窗口回覆。';
 
-/* 平台聯絡窗口：全站共用（聯絡我們、設備詢價、頁尾、守護者聯盟卡片） */
+/* 平台聯絡窗口：全站共用（聯絡我們、設備詢價、守護者協會單位頁）；電話與信箱登入後才顯示 */
 const CONTACT = {
   org: '臺灣守護者聯盟社會公益協會',
   name: '吳泓億',
@@ -246,8 +246,20 @@ const CONTACT = {
  * personLabel：學研單位用「主持人」，企業與協會用「聯繫窗口」
  * person：姓名職稱；空白時卡片顯示「主持人待補」或「聯繫窗口待補」
  * role：單位頁「平台角色」說明（沒有負責技術模組的單位會顯示這段）
+ * phone、email：聯繫窗口的電話與信箱，登入後才顯示（正式版須由後端控管，見 HANDOFF）
+ * 窗口姓名對外顯示英文
  * pending：素材尚未到齊時顯示「素材待補」；到齊後刪掉這個欄位 */
 const teams = [
+  { id: 'infineon', name: '英飛凌科技', type: '企業', title: '核心技術合作夥伴',
+    personLabel: '聯繫窗口', person: 'Lydia Huang', email: 'Lydia.Huang@infineon.com',
+    logos: ['logo-infineon.svg'], url: 'https://www.infineon.com/',
+    brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
+    role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
+  { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
+    personLabel: '聯繫窗口', person: CONTACT.name, phone: CONTACT.phone, email: CONTACT.email,
+    logos: ['guardians.png'], pending: '官網待補；聯繫窗口英文姓名待補',
+    brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
+    role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
   { id: 'lin', name: '高雄科技大學團隊', type: '學研團隊', title: '火焰辨識與即時測距',
     personLabel: '主持人', person: '林志學', photo: true, pending: '主持人形象照、職稱與官網待補',
     brief: '結合火焰辨識與深度測距，讓現場影像同時呈現火焰位置及距離。', app: 'firesight' },
@@ -255,16 +267,6 @@ const teams = [
     personLabel: '主持人', person: '許志仲 副教授', org: '國立陽明交通大學・ACVLab',
     logos: ['logo-nycu.png', 'logo-acvlab.png'], url: 'https://sites.google.com/view/acvlab',
     brief: '以真火真煙訓練與多源感知融合，讓不同感測資訊彼此補位。', app: 'vision' },
-  { id: 'infineon', name: '英飛凌科技', type: '企業', title: '核心技術合作夥伴',
-    personLabel: '聯繫窗口', person: '', logoText: '企業 Logo', url: 'https://www.infineon.com/',
-    pending: 'Logo、聯繫窗口與品牌使用規範待英飛凌提供；合作角色待英飛凌確認',
-    brief: '提供 Edge AI 晶片、開發板、技術文件與開發工具，支援消防 AI 研發與場域驗證。',
-    role: '核心技術合作夥伴，擔任三個角色：資源提供者（消防 AI 研發與場域驗證所需資源）、產品供應商（Edge AI 晶片、開發板與相關技術產品）、技術支援者（技術文件、開發工具與技術支援）。' },
-  { id: 'tga', name: '臺灣守護者聯盟社會公益協會', type: '協會', title: '連結消防現場與開發團隊',
-    personLabel: '聯繫窗口', person: CONTACT.name, phone: CONTACT.phone, email: CONTACT.email,
-    logos: ['guardians.png'], pending: '官網待補',
-    brief: '串聯現場需求、學研及產業合作，推進消防科技交流。',
-    role: '平台營運與聯絡窗口：負責合作洽詢、設備詢價與網站聯絡事項。' },
   { id: 'north', name: '北瀚科技', type: '企業', title: '從物件計數走向消防應用',
     personLabel: '聯繫窗口', person: '', logoText: '企業 Logo', pending: '企業 Logo、聯繫窗口與官網待補',
     brief: '以既有的手推車辨識與計數試作，延伸探索火場人員辨識及計數。', app: 'count' }

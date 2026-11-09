@@ -29,6 +29,7 @@ const REASONS = {
   reply: ['登入後即可回覆', '你剛剛輸入的內容會保留，登入完成後自動送出。'],
   member: ['登入以查看會員中心', '會員中心集中顯示你的發文與詢價紀錄。'],
   admin: ['管理員登入', '內容管理後臺僅限指定的管理員帳號。'],
+  contact: ['登入後查看聯絡方式', '電話與信箱僅提供給已登入的會員；不登入也可以直接使用聯絡表單。'],
   default: ['登入平台', '瀏覽網站不需要登入。登入後可以發文、回覆，並在會員中心追蹤。']
 };
 let pendingAfterLogin = null, lastFocus = null;
@@ -62,7 +63,7 @@ function finishLogin() {
   closeModal(); renderAccount();
   toast(`已登入：${me().name}（${me().identity}）`);
   const run = pendingAfterLogin; pendingAfterLogin = null;
-  if (run) run(); else if (['member', 'admin', 'community'].includes(route().section)) render();
+  if (run) run(); else if (['member', 'admin', 'community', 'team', 'contact'].includes(route().section)) render();
 }
 function setRole(role) {
   if (role === 'guest') auth.role = 'guest';
@@ -162,7 +163,14 @@ function joinCard(compact = false) {
     <span class="pc-media"><span class="pc-plus" aria-hidden="true">＋</span></span>
     <span class="pc-body"><span class="pc-name">歡迎加入</span><span class="pc-person">學研、產業、消防單位合作洽詢 →</span></span></a>`;
 }
-const contactLines = () => `<ul class="plain contact-lines"><li>${esc(CONTACT.org)}</li><li>聯絡人：${esc(CONTACT.name)}</li><li>電話：<a href="tel:${CONTACT.phone.replace(/-/g, '')}">${esc(CONTACT.phone)}</a></li><li>信箱：<a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a></li></ul>`;
+/* 聯絡方式：姓名公開；電話與信箱登入後才顯示（原型只做畫面隱藏，正式版由後端控管） */
+const lockedContact = () => `<button class="btn small lock-btn" data-login="contact">🔒 登入後查看電話與信箱</button>`;
+function contactDetails(c) {
+  if (!c.phone && !c.email) return '';
+  if (!loggedIn()) return `<li>${lockedContact()}</li>`;
+  return `${c.phone ? `<li>電話：<a href="tel:${esc(c.phone.replace(/-/g, ''))}">${esc(c.phone)}</a></li>` : ''}${c.email ? `<li>信箱：<a href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>` : ''}`;
+}
+const contactLines = (c = CONTACT, org = CONTACT.org) => `<ul class="plain contact-lines"><li>${esc(org)}</li><li>${esc(c.personLabel || '聯絡人')}：${esc(c.person || c.name || '待補')}</li>${contactDetails(c)}</ul>`;
 function partnerCard(t, compact = false) {
   return `<article class="pcard${compact ? ' compact' : ''}">
     <a class="pc-media" href="#/team/${t.id}" aria-label="${esc(t.name)}">${partnerMedia(t)}${t.pending ? '<span class="pc-pending">素材待補</span>' : ''}</a>
@@ -296,7 +304,7 @@ function team(id) {
     ${t.role ? `<h2>平台角色</h2><p>${esc(t.role)}</p>` : ''}
     ${t.pending ? `<p class="meta">${esc(t.pending)}</p>` : ''}
     <p class="source-note">${SOURCE_NOTE}</p></article>
-  <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3>${t.email ? contactLines() : `<p>${esc(t.personLabel || '聯繫窗口')}：${t.person ? esc(t.person) : '待補'}。希望了解合作方式或提供現場需求，可透過平台窗口聯繫。</p>`}${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
+  <aside class="side-stack">${partnerCard(t)}<div class="sidebox"><h3>與團隊聯繫</h3>${contactLines(t, t.name)}${t.phone || t.email ? '' : '<p>希望了解合作方式或提供現場需求，可透過平台窗口聯繫。</p>'}${link('contact?item=' + encodeURIComponent(t.name), '聯絡我們')}</div></aside></div>`;
 }
 function contact(params) {
   const item = params.get('item') || '', purpose = params.get('purpose') || '';
@@ -521,7 +529,7 @@ document.addEventListener('submit', e => {
     render(); toast('已送出回覆（示意，重新整理後重置）');
   }
   if (f.id === 'contact-form') {
-    const text = `主旨：【${data.purpose}】${data.item || '消防 Edge AI 平台'}\n收件窗口：${CONTACT.org}　${CONTACT.name}＜${CONTACT.email}＞\n\n${data.message}\n\n相關項目：${data.item || '未指定'}\n姓名：${data.name}\n回覆信箱：${data.email}`;
+    const text = `主旨：【${data.purpose}】${data.item || '消防 Edge AI 平台'}\n收件窗口：${CONTACT.org}\n\n${data.message}\n\n相關項目：${data.item || '未指定'}\n姓名：${data.name}\n回覆信箱：${data.email}`;
     $('#mail-output').innerHTML = '<h2 class="spaced">送出內容預覽</h2><p class="notice">內容已整理，尚未寄出。正式寄送功能待實作。</p><div class="mail-preview">' + esc(text) + '</div>';
   }
   if (f.id === 'admin-form') $('#admin-output').innerHTML = Object.entries(data).map(([k, v]) => `<h4>${esc(k)}</h4><p style="white-space:pre-wrap">${esc(v instanceof File ? (v.name || '未選擇') : v) || '尚未填寫'}</p>`).join('');

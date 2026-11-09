@@ -159,3 +159,4 @@ nav{align-items:center}.has-menu{position:relative;display:flex;align-items:cent
 .contact-lines li{padding:3px 0;font-size:14px}.contact-lines a{color:var(--blue);word-break:break-all}
 @media(max-width:1050px){.pgrid.partners-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:400px){.pgrid.partners-grid{grid-template-columns:1fr}}
+.lock-btn{margin-top:4px;font-size:13px}
